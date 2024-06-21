@@ -1,0 +1,13 @@
+= keyRice ReadMe
+:toc:
+
+== Description
+
+keyRice is a CLI program written in Go in to list all of your hotkeys on the system.
+Currently the program is able to list all of your KDE hotkeys in one place. It will include other desktop environments and window managers, as well as keyboinding heavy programs such as Neovim, Vim, etc...
+
+WARNING: This Program is not currently ready and is under development. (21 JUN 2024)
+
+
+
+FOOTER: CATSKINNER: There's always more than one way to skin a Cat.
