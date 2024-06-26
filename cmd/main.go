@@ -34,10 +34,11 @@ func parseShortcuts(filepath string, sourceName string) ([][3]string, error) {
 
     lines := strings.Split(string(content), "\n")
     var shortcuts [][3]string
+	var currentSection string
 
     for _, line := range lines {
         if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-      u      section := strings.TrimSuffix(strings.TrimPrefix(line, "["), "]")
+			currentSection = strings.Trim(line, "[]")
             continue // Skip section headers
         }
 
@@ -53,9 +54,14 @@ func parseShortcuts(filepath string, sourceName string) ([][3]string, error) {
         action := strings.TrimSpace(parts[0])
         keybinding := strings.TrimSpace(strings.Split(parts[1], ",")[0])
 
-        if keybinding == "none" {
-            continue // Skip shortcuts set to "none"
-        }
+		if keybinding == "none" || isNonKeyboardShortcut(keybinding) {
+			continue // Skip shortcuts set to "none" or non-keyboard shortcuts
+		}
+
+ 		if action == "_k_friendly_name" {
+			shortcuts = append(shortcuts, [3]string{currentSection, "", sourceName})
+			continue
+		}
 
         shortcuts = append(shortcuts, [3]string{keybinding, action, sourceName})
     }
@@ -63,12 +69,24 @@ func parseShortcuts(filepath string, sourceName string) ([][3]string, error) {
     return shortcuts, nil
 }
 
+func isNonKeyboardShortcut(keybinding string) bool {
+	// Add more patterns as needed to filter out non-keyboard shortcuts
+	nonKeyboardPatterns := []string{"Mouse", "Touchpad", "Button"}
+
+	for _, pattern := range nonKeyboardPatterns {
+		if strings.Contains(keybinding, pattern) {
+			return true
+		}
+	}
+	return false
+}
+
 func saveShortcutsToFile(shortcuts [][3]string, outputFilePath string) error {
     f, err := os.Create(outputFilePath)
     if err != nil {
         return err
     }
-    defer f.Close
+    defer f.Close()
 
     // Write Headers
     fmt.Fprintf(f, "%-25s %-50s %-30s\n?", "Keybinding", "Action", "Source")
@@ -79,6 +97,6 @@ func saveShortcutsToFile(shortcuts [][3]string, outputFilePath string) error {
         fmt.Fprintf(f, "%-25s %-50s %-30s\n", shortcut[0], shortcut[1], shortcut[2])
     }
     
-    fmt.Fprintf("Shortcuts have beem saved to %s\n", outputFilePath)
+    fmt.Printf("Shortcuts have beem saved to %s\n", outputFilePath)
     return nil
 }
